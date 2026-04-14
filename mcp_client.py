@@ -42,26 +42,39 @@ class MCPClient:
         return self._session
 
     async def list_tools(self) -> list[types.Tool]:
-        # TODO: Return a list of tools defined by the MCP server
-        return []
+        result = await self.session().list_tools()
+        return result.tools()
 
     async def call_tool(
         self, tool_name: str, tool_input: dict
     ) -> types.CallToolResult | None:
-        # TODO: Call a particular tool and return the result
-        return None
+        return await self.session().call_tool(tool_name, tool_input)
 
     async def list_prompts(self) -> list[types.Prompt]:
-        # TODO: Return a list of prompts defined by the MCP server
-        return []
+         result = await self.session().list_prompts()
+         return result.prompts()
 
     async def get_prompt(self, prompt_name, args: dict[str, str]):
-        # TODO: Get a particular prompt defined by the MCP server
-        return []
+         return await self.session().get_prompt(
+        name=prompt_name,
+        arguments=args
+    )
 
     async def read_resource(self, uri: str) -> Any:
-        # TODO: Read a resource, parse the contents and return it
-        return []
+        result = await self.session().read_resource(uri)
+
+        # Typically returns a list of contents
+        contents = result.contents()
+
+        # Handle common case: text content
+        parsed = []
+        for item in contents:
+            if hasattr(item, "text"):
+                parsed.append(item.text)
+            else:
+                parsed.append(item)
+
+        return parsed if len(parsed) > 1 else parsed[0]
 
     async def cleanup(self):
         await self._exit_stack.aclose()
